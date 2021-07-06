@@ -1,0 +1,25 @@
+version: "3.1"
+
+networks:
+  default:
+    external: true
+    name: traefik_default
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+      args:
+        PHP_VERSION: "${PHP_VERSION}"
+    environment:
+      APACHE_DOCUMENT_ROOT: "${APACHE_DOCUMENT_ROOT}"
+    volumes:
+      - ./:/var/www/html
+    networks:
+      default:
+        aliases:
+          - ci3-practice.localhost
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ci3-practice.rule=Host(`ci3-practice.localhost`)"
