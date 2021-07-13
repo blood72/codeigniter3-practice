@@ -1,11 +1,24 @@
 version: "3.1"
 
 networks:
-  default:
+  traefik:
     external: true
     name: traefik_default
 
 services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      #      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+    healthcheck:
+      test: "mysqladmin ping --silent"
+      timeout: 3s
+      interval: 1s
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
   php:
     build:
       context: .
@@ -17,9 +30,10 @@ services:
     volumes:
       - ./:/var/www/html
     networks:
-      default:
+      traefik:
         aliases:
           - ci3-practice.localhost
+      default:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.ci3-practice.rule=Host(`ci3-practice.localhost`)"
